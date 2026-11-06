@@ -7,7 +7,7 @@
 <div class="bg-primary text-white py-20">
     <div class="container mx-auto px-6 text-center">
         <h1 class="text-4xl md:text-5xl font-serif font-bold mb-4">Our Services</h1>
-        <p class="text-white/70">Holistic solutions for Construction, Security, and Logistics.</p>
+        <p class="text-white/70">Construction, engineering, infrastructure, security, logistics, consultancy and facility support.</p>
     </div>
 </div>
 
@@ -25,7 +25,7 @@
                         </div>
                     {% endif %}
                     <div class="absolute top-4 right-4 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                        {{ service.group.name|default:"Service" }}
+                        {{ service.group.display_name|default:"Service" }}
                     </div>
                 </div>
                 <div class="p-8 flex-grow flex flex-col">

@@ -31,7 +31,7 @@
         <div class="proj-card"
              data-project-id="{{ project.pk }}"
              data-title="{{ project.title|escapejs }}"
-             data-group="{{ project.group.name|default:''|escapejs }}"
+             data-group="{{ project.group.display_name|default:''|escapejs }}"
              data-description="{{ project.description|striptags|escapejs }}"
              onclick="openLightbox(this)"
              tabindex="0"
@@ -58,7 +58,7 @@
 
                     <!-- Hover overlay -->
                     <div class="proj-card__overlay">
-                        <span class="proj-card__group">{{ project.group.name|default:"Project" }}</span>
+                        <span class="proj-card__group">{{ project.group.display_name|default:"Project" }}</span>
                         <h3 class="proj-card__title">{{ project.title }}</h3>
                         <p class="proj-card__snippet">{{ project.description|striptags|truncatechars:100 }}</p>
                         <div class="proj-card__view-btn">

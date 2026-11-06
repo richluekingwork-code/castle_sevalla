@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Castle General Group{% endblock %} | Leading Construction & Security</title>
+    <title>{% block title %}Home{% endblock %} | Castle Group of Companies</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -65,7 +65,7 @@
                 
                 {% if logo and logo.image %}
                     <div class="h-12 w-px bg-gray-200 mx-4"></div>
-                    <img src="{{ logo.image.url }}" alt="Castle General Group Logo" class="absolute h-40 w-40 object-contain top-12 -translate-y-1/2">
+                    <img src="{{ logo.image.url }}" alt="Castle Group of Companies logo" class="absolute h-40 w-40 object-contain top-12 -translate-y-1/2">
                 {% endif %}
 
             </a>
@@ -110,24 +110,20 @@
                 <div class="col-span-1 md:col-span-1">
                     <div class="flex items-center gap-2 mb-6">
                          {% if logo and logo.image %}
-                             <img src="{{ logo.image.url }}" alt="Castle Group" class="h-10 w-auto bg-white rounded p-1">
+                             <img src="{{ logo.image.url }}" alt="Castle Group of Companies" class="h-10 w-auto bg-white rounded p-1">
                         {% else %}
                             <div class="bg-white text-dark w-8 h-8 flex items-center justify-center rounded font-bold">C</div>
-                            <span class="text-xl font-serif font-bold">CastleGroup</span>
+                            <span class="text-xl font-serif font-bold">Castle Group of Companies</span>
                         {% endif %}
                     </div>
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">
-                        Providing top-tier Construction, Security, and Logistics services across West Africa. Integrity, Quality, and Efficiency.
+                        Castle Group of Companies is a Liberian-owned business delivering construction, engineering, infrastructure, security, logistics, consultancy and facility support services. Based in Paynesville, Montserrado County, Liberia.
                     </p>
                     <div class="flex gap-4">
                         {% for link in social_links %}
-                         <a href="{{ link.link }}" target="_blank" class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-secondary transition-colors">
+                         <a href="{{ link.link }}" target="_blank" rel="noopener" aria-label="{{ link.name }}" class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-secondary transition-colors">
                             <i class="{{ link.icon_class }}"></i>
                          </a>
-                        {% empty %}
-                            <!-- Default Socials -->
-                            <a href="#" class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-secondary transition-colors"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-secondary transition-colors"><i class="fab fa-linkedin-in"></i></a>
                         {% endfor %}
                     </div>
                 </div>
@@ -137,48 +133,52 @@
                     <h3 class="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Company</h3>
                     <ul class="space-y-3 text-gray-400 text-sm">
                         <li><a href="{% url 'castle_site:about' %}" class="hover:text-white transition-colors">About Us</a></li>
-                        <li><a href="{% url 'castle_site:about' %}#team" class="hover:text-white transition-colors">Our Team</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="{% url 'castle_site:services' %}" class="hover:text-white transition-colors">Services</a></li>
+                        <li><a href="{% url 'castle_site:projects' %}" class="hover:text-white transition-colors">Projects</a></li>
+                        <li><a href="{% url 'castle_site:contact' %}" class="hover:text-white transition-colors">Contact</a></li>
                     </ul>
                 </div>
 
                 <!-- Services -->
+                {% if services_list %}
                 <div>
                     <h3 class="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Services</h3>
                     <ul class="space-y-3 text-gray-400 text-sm">
                         {% for service in services_list %}
                             <li><a href="{% url 'castle_site:services' %}" class="hover:text-white transition-colors">{{ service.title }}</a></li>
-                        {% empty %}
-                            <li><a href="#" class="hover:text-white transition-colors">Construction</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors">Security Guard</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors">Logistics</a></li>
                         {% endfor %}
                     </ul>
                 </div>
+                {% endif %}
 
                 <!-- Contact -->
                 <div>
                     <h3 class="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Contact</h3>
                     <ul class="space-y-4 text-gray-400 text-sm">
+                        {% if contact_info.address %}
                         <li class="flex items-start gap-3">
                             <i class="fas fa-map-marker-alt mt-1 text-secondary"></i>
-                            <span>{{ contact_info.address|default:"Seekie Community, Duport Road, Paynesville, Liberia" }}</span>
+                            <span>{{ contact_info.address }}</span>
                         </li>
+                        {% endif %}
+                        {% for phone in contact_phones %}
                         <li class="flex items-center gap-3">
                             <i class="fas fa-phone text-secondary"></i>
-                            <span>{{ contact_info.phone|default:"(+231) 880-337-882" }}</span>
+                            <a href="tel:{{ phone.tel }}" class="hover:text-white transition-colors">{{ phone.display }}</a>
                         </li>
+                        {% endfor %}
+                        {% if contact_info.email %}
                         <li class="flex items-center gap-3">
                             <i class="fas fa-envelope text-secondary"></i>
-                            <span>{{ contact_info.email|default:"info@castlegroup.com" }}</span>
+                            <a href="mailto:{{ contact_info.email }}" class="hover:text-white transition-colors break-all">{{ contact_info.email }}</a>
                         </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
 
             <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-xs">
-                &copy; {% now "Y" %} Castle General Group of Company. All rights reserved.
+                &copy; {% now "Y" %} Castle Group of Companies. All rights reserved.
             </div>
         </div>
     </footer>

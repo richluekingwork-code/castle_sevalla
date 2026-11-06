@@ -8,71 +8,64 @@
     <div class="container mx-auto px-6">
         <div class="text-center mb-16" data-aos="fade-up">
             <h1 class="text-4xl font-serif font-bold text-primary mb-4">Get in Touch</h1>
-            <p class="text-gray-500 max-w-xl mx-auto">Have a project in mind or need our security services? Reach out to us today.</p>
+            <p class="text-gray-500 max-w-xl mx-auto">Have a project in mind or need our services? Send us a message and our team will get back to you.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             
             <!-- Contact Info & Map -->
             <div class="space-y-8" data-aos="fade-right">
-                <!-- Info Cards -->
+                <!-- Info Cards: only details entered under Contact Info in the admin -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% if contact_info.address %}
                     <div class="bg-white p-6 rounded-xl shadow-md flex items-start gap-4">
                         <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0">
                             <i class="fas fa-map-marker-alt text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-dark mb-1">Our Location</h3>
-                            <p class="text-gray-500 text-sm">Seekie Community, Duport Road, Paynesville, Liberia</p>
+                            <h3 class="font-bold text-dark mb-1">Our Office</h3>
+                            <p class="text-gray-500 text-sm">{{ contact_info.address }}</p>
                         </div>
                     </div>
+                    {% endif %}
 
+                    {% if contact_phones %}
                     <div class="bg-white p-6 rounded-xl shadow-md flex items-start gap-4">
                         <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center text-secondary flex-shrink-0">
                             <i class="fas fa-phone-alt text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-dark mb-1">Phone Number</h3>
+                            <h3 class="font-bold text-dark mb-1">Telephone</h3>
                             <p class="text-gray-500 text-sm">
-                                <a href="tel:+231880337882" class="hover:text-primary transition-colors">(+231) 880-337-882</a><br>
-                                <a href="tel:+231776157650" class="hover:text-primary transition-colors">(+231) 776-157-650</a>
+                                {% for phone in contact_phones %}
+                                <a href="tel:{{ phone.tel }}" class="hover:text-primary transition-colors">{{ phone.display }}</a>{% if not forloop.last %}<br>{% endif %}
+                                {% endfor %}
                             </p>
                         </div>
                     </div>
+                    {% endif %}
 
+                    {% if contact_info.email %}
                     <div class="bg-white p-6 rounded-xl shadow-md flex items-start gap-4">
                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 flex-shrink-0">
                             <i class="fas fa-envelope text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-dark mb-1">Email Address</h3>
-                            <p class="text-gray-500 text-sm">
-                                castlegroupofc@gmail.com<br>
-                                info@castlegeneral.com
+                            <h3 class="font-bold text-dark mb-1">Email</h3>
+                            <p class="text-gray-500 text-sm break-all">
+                                <a href="mailto:{{ contact_info.email }}" class="hover:text-primary transition-colors">{{ contact_info.email }}</a>
                             </p>
                         </div>
                     </div>
-                     <div class="bg-white p-6 rounded-xl shadow-md flex items-start gap-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0">
-                            <i class="fas fa-clock text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-dark mb-1">Working Hours</h3>
-                            <p class="text-gray-500 text-sm">
-                                Mon - Sat: 8:00 AM - 6:00 PM<br>
-                                Sun: Closed
-                            </p>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
 
-                <!-- Google Map Iframe -->
+                {% if contact_info.maplink %}
+                <!-- Map: set Contact Info > Maplink to a Google Maps "Embed a map" URL -->
                 <div class="bg-white p-2 rounded-xl shadow-lg h-80 overflow-hidden">
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15878.89539209736!2d-10.7410!3d6.2625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xf0a030000000000%3A0x0!2zNsKwMTUnNDUuMCJOIDEwwrA0NCgyNy42Ilc!5e0!3m2!1sen!2slr!4v1620000000000!5m2!1sen!2slr" 
-                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy">
-                    </iframe>
+                    <iframe src="{{ contact_info.maplink }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                 </div>
+                {% endif %}
             </div>
 
             <!-- Contact Form -->

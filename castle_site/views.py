@@ -15,7 +15,13 @@ class ContextMixin:
     """Mixin to add common context like branding and contact info to all views"""
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['contact_info'] = ContactInfo.objects.first()
+        contact_info = ContactInfo.objects.first()
+        context['contact_info'] = contact_info
+        # ContactInfo.phone may hold several numbers separated by commas.
+        context['contact_phones'] = [
+            {'display': number.strip(), 'tel': ''.join(c for c in number if c.isdigit() or c == '+')}
+            for number in (contact_info.phone or '').split(',') if number.strip()
+        ] if contact_info else []
         context['logo'] = WebsiteLogo.objects.first() if 'WebsiteLogo' in globals() else None
         context['services_list'] = Services.objects.all()[:5] # For Footer
         context['social_links'] = SocialMediaLink.objects.all()
