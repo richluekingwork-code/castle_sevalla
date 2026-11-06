@@ -79,8 +79,8 @@
             {% for member in team %}
             <div class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group w-full sm:w-72" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}00">
                 {% if member.image %}
-                <div class="h-64 overflow-hidden relative">
-                    <img src="{{ member.image.url }}" alt="{{ member.fullname }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                <div class="h-80 overflow-hidden relative">
+                    <img src="{{ member.image.url }}" alt="{{ member.fullname }}" class="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500">
                 </div>
                 {% endif %}
                 <div class="p-6 text-center">
