@@ -2,60 +2,53 @@
 {% load static %}
 
 {% block content %}
-<!-- Hero Section -->
+<!-- Hero Section: one headline over a crossfading slideshow of the Hero Images -->
 <section class="relative h-[85vh] flex items-center overflow-hidden bg-primary hero-pattern group">
-    <!-- Slider Container -->
-    <div id="hero-slider" class="absolute inset-0 w-full h-full">
-        {% for hero in hero_images %}
-        <div class="hero-slide absolute inset-0 transition-opacity duration-1000 {% if forloop.first %}opacity-100 z-10{% else %}opacity-0 z-0{% endif %}" data-index="{{ forloop.counter0 }}">
-            {% if hero.image %}
-            <div class="absolute inset-0 z-0">
-                <img src="{{ hero.image.url }}" alt="{{ hero.hero_title }}" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-r from-primary/90 to-transparent"></div>
-            </div>
-            {% endif %}
-            <div class="container mx-auto px-6 relative z-20 h-full flex items-center">
-                <div class="max-w-2xl text-white pt-20">
-                    <span class="text-secondary font-bold tracking-widest uppercase text-sm mb-4 block animate-fade-in-up">Welcome to Castle Group of Companies</span>
-                    <h1 class="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight animate-fade-in-up delay-100">
-                        {{ hero.hero_title }}
-                    </h1>
-                    {% if hero.hero_paragraph %}
-                    <p class="text-lg md:text-xl text-gray-200 mb-8 font-light animate-fade-in-up delay-200">
-                        {{ hero.hero_paragraph|striptags }}
-                    </p>
-                    {% endif %}
-                    <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-300">
-                        <a href="{% url 'castle_site:projects' %}" class="px-8 py-4 bg-secondary text-white font-bold rounded hover:bg-white hover:text-primary transition-all shadow-lg text-center">
-                            Explore Our Projects
-                        </a>
-                        <a href="{% url 'castle_site:contact' %}" class="px-8 py-4 border border-white text-white font-bold rounded hover:bg-white hover:text-primary transition-all text-center">
-                            Request a Consultation
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="hero-slide absolute inset-0 opacity-100 z-10">
-            <div class="container mx-auto px-6 relative z-20 h-full flex items-center">
-                <div class="max-w-2xl text-white">
-                    <span class="text-secondary font-bold tracking-widest uppercase text-sm mb-4 block">Welcome</span>
-                    <h1 class="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight">Castle Group of Companies</h1>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="{% url 'castle_site:contact' %}" class="px-8 py-4 bg-secondary text-white font-bold rounded hover:bg-white hover:text-primary transition-all shadow-lg text-center">Request a Consultation</a>
-                    </div>
-                </div>
-            </div>
+    {% if hero_slides %}
+    <div id="hero-slider" class="absolute inset-0 w-full h-full" aria-hidden="true">
+        {% for slide in hero_slides %}
+        <div class="hero-slide absolute inset-0 transition-opacity duration-1000 {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}">
+            {# Blurred copy fills the frame; the sharp image is shown whole, so tall images are not cropped. #}
+            <img src="{{ slide.image.url }}" alt="" class="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-60" {% if not forloop.first %}loading="lazy"{% endif %}>
+            <img src="{{ slide.image.url }}" alt="{{ slide.hero_title }}" class="absolute inset-0 w-full h-full object-contain md:object-right" {% if not forloop.first %}loading="lazy"{% endif %}>
         </div>
         {% endfor %}
+        <div class="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/60 to-transparent"></div>
+    </div>
+    {% endif %}
+
+    <div class="container mx-auto px-6 relative z-20 h-full flex items-center">
+        <div class="max-w-2xl text-white pt-20">
+            <span class="text-secondary font-bold tracking-widest uppercase text-sm mb-4 block animate-fade-in-up">Welcome to Castle Group of Companies</span>
+            <h1 class="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight animate-fade-in-up delay-100 drop-shadow-lg">
+                {{ hero.hero_title|default:"Castle Group of Companies" }}
+            </h1>
+            {% if hero.hero_paragraph %}
+            <p class="text-lg md:text-xl text-gray-100 mb-8 font-light animate-fade-in-up delay-200 drop-shadow">
+                {{ hero.hero_paragraph|striptags }}
+            </p>
+            {% endif %}
+            <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-300">
+                <a href="{% url 'castle_site:projects' %}" class="px-8 py-4 bg-secondary text-white font-bold rounded hover:bg-white hover:text-primary transition-all shadow-lg text-center">
+                    Explore Our Projects
+                </a>
+                <a href="{% url 'castle_site:contact' %}" class="px-8 py-4 border border-white text-white font-bold rounded hover:bg-white hover:text-primary transition-all text-center">
+                    Request a Consultation
+                </a>
+            </div>
+        </div>
     </div>
 
-    {% if hero_images|length > 1 %}
+    {% if hero_slides|length > 1 %}
     <!-- Slider Controls -->
-    <div class="absolute bottom-10 right-10 z-30 flex gap-2">
-        <button onclick="prevSlide()" class="w-12 h-12 rounded-full border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-primary transition-colors"><i class="fas fa-arrow-left"></i></button>
-        <button onclick="nextSlide()" class="w-12 h-12 rounded-full border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-primary transition-colors"><i class="fas fa-arrow-right"></i></button>
+    <div class="absolute bottom-10 right-10 z-30 flex items-center gap-4">
+        <div class="hidden sm:flex gap-2" id="hero-dots">
+            {% for slide in hero_slides %}
+            <button onclick="showSlide({{ forloop.counter0 }}, true)" class="hero-dot w-2.5 h-2.5 rounded-full {% if forloop.first %}bg-white{% else %}bg-white/40{% endif %}" aria-label="Show image {{ forloop.counter }}"></button>
+            {% endfor %}
+        </div>
+        <button onclick="prevSlide()" aria-label="Previous image" class="w-12 h-12 rounded-full border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-primary transition-colors"><i class="fas fa-arrow-left"></i></button>
+        <button onclick="nextSlide()" aria-label="Next image" class="w-12 h-12 rounded-full border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-primary transition-colors"><i class="fas fa-arrow-right"></i></button>
     </div>
     {% endif %}
 </section>
@@ -122,63 +115,35 @@
 </section>
 {% endif %}
 
-<!-- Hero Modal -->
-<div id="heroModal" class="fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeHeroModal()"></div>
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-full max-w-2xl p-8 animate-fade-in-up">
-        <button onclick="closeHeroModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
-        <h2 id="modalTitle" class="text-3xl font-bold text-primary mb-4 font-serif"></h2>
-        <div id="modalContent" class="prose max-w-none text-gray-600"></div>
-    </div>
-</div>
-
 <script>
-    // Slider Logic
+    // Hero slideshow: crossfade the background images; the headline stays put.
+    const heroSlides = document.querySelectorAll('.hero-slide');
+    const heroDots = document.querySelectorAll('.hero-dot');
     let currentSlide = 0;
-    const slides = document.querySelectorAll('.hero-slide');
-    const totalSlides = slides.length;
+    let heroTimer = null;
 
-    function showSlide(index) {
-        slides.forEach(slide => {
-             slide.classList.remove('opacity-100', 'z-10');
-             slide.classList.add('opacity-0', 'z-0');
+    function showSlide(index, fromUser) {
+        if (!heroSlides.length) return;
+        currentSlide = (index + heroSlides.length) % heroSlides.length;
+        heroSlides.forEach((slide, i) => {
+            slide.classList.toggle('opacity-100', i === currentSlide);
+            slide.classList.toggle('opacity-0', i !== currentSlide);
         });
-        slides[index].classList.remove('opacity-0', 'z-0');
-        slides[index].classList.add('opacity-100', 'z-10');
-        
-        // Retrigger animations
-        const content = slides[index].querySelectorAll('.animate-fade-in-up');
-        content.forEach(el => {
-            el.style.animation = 'none';
-            el.offsetHeight; /* trigger reflow */
-            el.style.animation = null; 
+        heroDots.forEach((dot, i) => {
+            dot.classList.toggle('bg-white', i === currentSlide);
+            dot.classList.toggle('bg-white/40', i !== currentSlide);
         });
+        if (fromUser) startHeroTimer();
     }
-
-    function nextSlide() {
-        currentSlide = (currentSlide + 1) % totalSlides;
-        showSlide(currentSlide);
+    function nextSlide() { showSlide(currentSlide + 1, true); }
+    function prevSlide() { showSlide(currentSlide - 1, true); }
+    function startHeroTimer() {
+        clearInterval(heroTimer);
+        if (heroSlides.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            heroTimer = setInterval(() => showSlide(currentSlide + 1), 6000);
+        }
     }
-
-    function prevSlide() {
-        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-        showSlide(currentSlide);
-    }
-    
-    if(totalSlides > 1) {
-        setInterval(nextSlide, 7000); // Auto slide every 7s
-    }
-
-    // Modal Logic
-    function openHeroModal(title, content) {
-        document.getElementById('modalTitle').textContent = title;
-        document.getElementById('modalContent').innerHTML = content;
-        document.getElementById('heroModal').classList.remove('hidden');
-    }
-
-    function closeHeroModal() {
-        document.getElementById('heroModal').classList.add('hidden');
-    }
+    startHeroTimer();
 </script>
 
 <style>

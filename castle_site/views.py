@@ -33,7 +33,11 @@ class HomeView(ContextMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Fetch data for the landing page
-        context['hero_images'] = HeroImages.objects.order_by('-submitted_at')
+        # The hero shows one headline (the first entry with a paragraph, else the first entry)
+        # over a crossfading slideshow of every entry that has an image, in the order added.
+        heroes = list(HeroImages.objects.order_by('submitted_at', 'pk'))
+        context['hero'] = next((h for h in heroes if h.hero_paragraph), heroes[0] if heroes else None)
+        context['hero_slides'] = [h for h in heroes if h.image]
         context['services'] = Services.objects.all()[:6]
         context['projects'] = Projects.objects.order_by('-created_at')[:6]
         context['stats'] = Stat.objects.all()
