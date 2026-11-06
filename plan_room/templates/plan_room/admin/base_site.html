@@ -1,0 +1,10 @@
+<!-- templates/admin/base_site.html: Custom Django Admin base (override) -->
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | Castle Plan Room Admin{% endblock %}
+
+{% block branding %}
+    <h1 id="site-name"><a href="{% url 'admin:index' %}">Castle Plan Room Admin</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

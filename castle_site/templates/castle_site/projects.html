@@ -1,0 +1,587 @@
+{% extends 'castle_site/base.html' %}
+{% load static %}
+
+{% block title %}Our Projects{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════
+     PAGE HERO
+══════════════════════════════════════ -->
+<div class="proj-hero">
+    <div class="proj-hero__inner">
+        <p class="proj-hero__label">Our Work</p>
+        <h1 class="proj-hero__heading">Project Portfolio</h1>
+        <p class="proj-hero__sub">Explore the impact we've made through our projects.</p>
+    </div>
+    <div class="proj-hero__bg-deco"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PROJECT GRID
+══════════════════════════════════════ -->
+<section class="proj-section">
+    <div class="proj-grid">
+
+        {% for project in projects %}
+        {% with imgs=project.gallery_images.all cover=project.gallery_images.all|first %}
+
+        {# Build a JS-safe JSON list of images for this project #}
+        <div class="proj-card"
+             data-project-id="{{ project.pk }}"
+             data-title="{{ project.title|escapejs }}"
+             data-group="{{ project.group.name|default:''|escapejs }}"
+             data-description="{{ project.description|striptags|escapejs }}"
+             onclick="openLightbox(this)"
+             tabindex="0"
+             role="button"
+             aria-label="View gallery for {{ project.title }}">
+
+            <!-- Scattered photo-pile layers (up to 3 behind) -->
+            <div class="proj-card__pile">
+                {% for img in imgs|slice:"3" %}
+                <div class="proj-card__layer proj-card__layer--{{ forloop.counter }}"
+                     {% if img %} style="background-image:url('{{ img.image.url }}')" {% endif %}>
+                </div>
+                {% endfor %}
+
+                <!-- Main/front card -->
+                <div class="proj-card__front">
+                    {% if cover %}
+                        <img src="{{ cover.image.url }}" alt="{{ project.title }}" class="proj-card__img" loading="lazy">
+                    {% else %}
+                        <div class="proj-card__placeholder">
+                            <i class="fas fa-images"></i>
+                        </div>
+                    {% endif %}
+
+                    <!-- Hover overlay -->
+                    <div class="proj-card__overlay">
+                        <span class="proj-card__group">{{ project.group.name|default:"Project" }}</span>
+                        <h3 class="proj-card__title">{{ project.title }}</h3>
+                        <p class="proj-card__snippet">{{ project.description|striptags|truncatechars:100 }}</p>
+                        <div class="proj-card__view-btn">
+                            <i class="fas fa-expand-alt"></i> View Gallery
+                        </div>
+                    </div>
+                </div><!-- /.proj-card__front -->
+            </div><!-- /.proj-card__pile -->
+
+            <!-- Photo count badge -->
+            {% with count=imgs.count %}
+            {% if count %}
+            <div class="proj-card__badge">
+                <i class="fas fa-images"></i> {{ count }} photo{{ count|pluralize }}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Hidden image data for JS -->
+            <script type="application/json" class="proj-images-data">
+                [
+                    {% for img in imgs %}
+                    {
+                        "src": "{{ img.image.url }}",
+                        "caption": "{{ img.caption|default:''|escapejs }}"
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            </script>
+
+        </div><!-- /.proj-card -->
+        {% endwith %}
+        {% empty %}
+        <div class="proj-empty">
+            <i class="fas fa-folder-open"></i>
+            <p>No projects to display yet.</p>
+        </div>
+        {% endfor %}
+
+    </div><!-- /.proj-grid -->
+</section>
+
+
+<!-- ══════════════════════════════════════
+     LIGHTBOX MODAL
+══════════════════════════════════════ -->
+<div id="clrLightbox" class="lb-backdrop" aria-modal="true" role="dialog" aria-label="Image Gallery" hidden>
+    <div class="lb-stage">
+
+        <!-- Close -->
+        <button class="lb-close" onclick="closeLightbox()" aria-label="Close Gallery">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Left arrow -->
+        <button class="lb-arrow lb-arrow--prev" onclick="lbStep(-1)" aria-label="Previous Image">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <!-- Main image area -->
+        <div class="lb-img-wrap">
+            <img id="lbImage" src="" alt="" class="lb-img">
+            <div class="lb-spinner" id="lbSpinner"><span></span></div>
+        </div>
+
+        <!-- Right arrow -->
+        <button class="lb-arrow lb-arrow--next" onclick="lbStep(1)" aria-label="Next Image">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Info panel -->
+        <div class="lb-info">
+            <div class="lb-info__text">
+                <span id="lbGroup" class="lb-info__group"></span>
+                <h2 id="lbTitle" class="lb-info__title"></h2>
+                <p  id="lbDesc"  class="lb-info__desc"></p>
+                <p  id="lbCaption" class="lb-info__caption"></p>
+            </div>
+            <!-- Dots -->
+            <div id="lbDots" class="lb-dots"></div>
+            <!-- Counter -->
+            <span id="lbCounter" class="lb-counter"></span>
+        </div>
+
+    </div><!-- /.lb-stage -->
+</div><!-- /#clrLightbox -->
+
+
+<!-- ══════════════════════════════════════
+     STYLES
+══════════════════════════════════════ -->
+<style>
+/* ── Variables ─────────────────────────── */
+:root {
+    --acc: #c9a84c;          /* gold accent */
+    --acc2: #8b5e3c;         /* warm brown */
+    --dark: #0f1117;
+    --card-radius: 18px;
+    --card-shadow: 0 20px 60px rgba(0,0,0,.22);
+}
+
+/* ── Hero ───────────────────────────────── */
+.proj-hero {
+    position: relative;
+    background: var(--dark);
+    overflow: hidden;
+    padding: 100px 24px 80px;
+    text-align: center;
+}
+.proj-hero__bg-deco {
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse 60% 70% at 20% 50%, rgba(201,168,76,.12) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 80% 50%, rgba(139,94,60,.10) 0%, transparent 70%);
+    pointer-events: none;
+}
+.proj-hero__inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+.proj-hero__label {
+    display: inline-block;
+    font-size: .72rem; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--acc); margin-bottom: 16px;
+}
+.proj-hero__heading {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800; color: #fff;
+    margin: 0 0 14px;
+    font-family: Georgia, serif;
+}
+.proj-hero__sub { color: rgba(255,255,255,.55); font-size: 1rem; margin: 0; }
+
+/* ── Section / Grid ─────────────────────── */
+.proj-section { padding: 80px 24px 100px; background: #f7f4ef; }
+.proj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 56px 40px;
+    max-width: 1200px; margin: 0 auto;
+}
+
+/* ── Card ────────────────────────────────── */
+.proj-card {
+    position: relative;
+    cursor: pointer;
+    outline: none;
+}
+.proj-card:focus-visible .proj-card__front { box-shadow: 0 0 0 3px var(--acc), var(--card-shadow); }
+
+/* Photo-pile wrapper */
+.proj-card__pile { position: relative; padding-top: 16px; padding-right: 12px; }
+
+/* Back layers — scattered */
+.proj-card__layer {
+    position: absolute;
+    inset: 0; top: 0; left: 0;
+    border-radius: var(--card-radius);
+    background-size: cover;
+    background-position: center;
+    background-color: #ddd;
+    transition: transform .45s cubic-bezier(.34,1.56,.64,1);
+}
+.proj-card__layer--1 {
+    transform: rotate(-4deg) translate(10px, 8px);
+    z-index: 1;
+    filter: brightness(.7);
+}
+.proj-card__layer--2 {
+    transform: rotate(2.5deg) translate(-6px, 12px);
+    z-index: 2;
+    filter: brightness(.8);
+}
+.proj-card__layer--3 {
+    transform: rotate(-1.5deg) translate(4px, 4px);
+    z-index: 3;
+    filter: brightness(.9);
+}
+.proj-card:hover .proj-card__layer--1 { transform: rotate(-7deg) translate(16px, 14px); }
+.proj-card:hover .proj-card__layer--2 { transform: rotate(4.5deg) translate(-12px, 18px); }
+.proj-card:hover .proj-card__layer--3 { transform: rotate(-2.5deg) translate(8px, 6px); }
+
+/* Front card */
+.proj-card__front {
+    position: relative; z-index: 10;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    box-shadow: var(--card-shadow);
+    transition: transform .45s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
+}
+.proj-card:hover .proj-card__front {
+    transform: scale(1.03) translateY(-4px);
+    box-shadow: 0 32px 80px rgba(0,0,0,.32);
+}
+
+.proj-card__img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+.proj-card:hover .proj-card__img { transform: scale(1.08); }
+
+.proj-card__placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #2a2d35, #1a1c22);
+    color: rgba(255,255,255,.3); font-size: 3rem;
+}
+
+/* Overlay */
+.proj-card__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,15,.92) 0%, rgba(10,10,15,.5) 50%, transparent 100%);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 28px;
+    opacity: 0;
+    transition: opacity .35s ease;
+}
+.proj-card:hover .proj-card__overlay { opacity: 1; }
+
+.proj-card__group {
+    font-size: .65rem; font-weight: 800; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--acc);
+    margin-bottom: 6px; display: block;
+}
+.proj-card__title {
+    font-size: 1.15rem; font-weight: 700; color: #fff;
+    margin: 0 0 8px; font-family: Georgia, serif;
+    transform: translateY(8px); transition: transform .3s ease .05s;
+}
+.proj-card:hover .proj-card__title { transform: translateY(0); }
+.proj-card__snippet {
+    font-size: .82rem; color: rgba(255,255,255,.7);
+    margin: 0 0 14px; line-height: 1.5;
+    transform: translateY(8px); transition: transform .3s ease .1s;
+}
+.proj-card:hover .proj-card__snippet { transform: translateY(0); }
+
+.proj-card__view-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: .78rem; font-weight: 700;
+    color: var(--dark); background: var(--acc);
+    padding: 7px 16px; border-radius: 30px;
+    align-self: flex-start;
+    transform: translateY(8px); transition: transform .3s ease .15s, background .2s;
+}
+.proj-card:hover .proj-card__view-btn { transform: translateY(0); }
+.proj-card__view-btn:hover { background: #e0b85a; }
+
+/* Photo count badge */
+.proj-card__badge {
+    position: absolute;
+    top: 4px; right: 4px; z-index: 20;
+    background: rgba(0,0,0,.75);
+    backdrop-filter: blur(6px);
+    color: #fff; font-size: .7rem; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+    display: flex; align-items: center; gap: 5px;
+    border: 1px solid rgba(255,255,255,.1);
+}
+
+/* Empty state */
+.proj-empty {
+    grid-column: 1/-1;
+    text-align: center; padding: 80px 24px;
+    color: #999;
+}
+.proj-empty i { font-size: 3rem; margin-bottom: 14px; display: block; opacity: .4; }
+.proj-empty p { font-size: 1rem; }
+
+
+/* ══════════════════════════════════════
+   LIGHTBOX
+══════════════════════════════════════ */
+.lb-backdrop {
+    position: fixed; inset: 0; z-index: 9000;
+    background: rgba(6, 7, 12, 0.96);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: lbFadeIn .25s ease forwards;
+}
+.lb-backdrop[hidden] { display: none !important; }
+
+@keyframes lbFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.lb-stage {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; max-width: 960px;
+    max-height: 90vh;
+    animation: lbSlideUp .3s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes lbSlideUp {
+    from { transform: translateY(30px) scale(.97); opacity: 0; }
+    to   { transform: translateY(0)    scale(1);   opacity: 1; }
+}
+
+/* Close */
+.lb-close {
+    position: absolute; top: -48px; right: 0;
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,.6); font-size: 1.6rem;
+    transition: color .2s, transform .2s;
+    padding: 4px;
+}
+.lb-close:hover { color: var(--acc); transform: rotate(90deg); }
+
+/* Arrows */
+.lb-arrow {
+    position: absolute; top: 50%; z-index: 10;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%; width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1rem; cursor: pointer;
+    transition: background .2s, color .2s, transform .2s;
+}
+.lb-arrow:hover { background: var(--acc); color: var(--dark); }
+.lb-arrow--prev { left: -62px; }
+.lb-arrow--next { right: -62px; }
+@media (max-width: 900px) {
+    .lb-arrow--prev { left: 4px; }
+    .lb-arrow--next { right: 4px; }
+}
+
+/* Image */
+.lb-img-wrap {
+    position: relative;
+    width: 100%;
+    max-height: 60vh;
+    display: flex; align-items: center; justify-content: center;
+    background: #111318; border-radius: 14px; overflow: hidden;
+}
+.lb-img {
+    max-width: 100%; max-height: 60vh;
+    object-fit: contain; display: block;
+    transition: opacity .2s ease;
+    border-radius: 14px;
+}
+.lb-img.lb-fading { opacity: 0; }
+
+/* Spinner */
+.lb-spinner {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; opacity: 0; transition: opacity .2s;
+}
+.lb-spinner.active { opacity: 1; }
+.lb-spinner span {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,.15);
+    border-top-color: var(--acc);
+    animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Info panel */
+.lb-info {
+    width: 100%; margin-top: 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    text-align: center;
+}
+.lb-info__group {
+    font-size: .65rem; font-weight: 800; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--acc); display: block; margin-bottom: 4px;
+}
+.lb-info__title {
+    font-size: 1.35rem; font-weight: 700;
+    color: #fff; margin: 0 0 6px; font-family: Georgia, serif;
+}
+.lb-info__desc {
+    font-size: .85rem; color: rgba(255,255,255,.5);
+    max-width: 640px; margin: 0; line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.lb-info__caption {
+    font-size: .8rem; color: rgba(255,255,255,.35);
+    font-style: italic; margin: 0;
+}
+
+/* Dots */
+.lb-dots { display: flex; gap: 7px; }
+.lb-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    border: none; cursor: pointer; padding: 0;
+    transition: background .2s, transform .2s;
+}
+.lb-dot.active { background: var(--acc); transform: scale(1.4); }
+
+/* Counter */
+.lb-counter { font-size: .75rem; color: rgba(255,255,255,.3); }
+
+/* Responsive */
+@media (max-width: 640px) {
+    .proj-grid { gap: 44px 24px; }
+    .lb-info__desc { -webkit-line-clamp: 1; }
+}
+</style>
+
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+(function () {
+    // ── State ────────────────────────────────
+    let IMAGES   = [];   // [{src, caption}, ...]
+    let CURRENT  = 0;
+    let META     = {};   // {title, group, description}
+
+    // ── DOM refs ─────────────────────────────
+    const backdrop  = document.getElementById('clrLightbox');
+    const lbImg     = document.getElementById('lbImage');
+    const spinner   = document.getElementById('lbSpinner');
+    const lbTitle   = document.getElementById('lbTitle');
+    const lbGroup   = document.getElementById('lbGroup');
+    const lbDesc    = document.getElementById('lbDesc');
+    const lbCaption = document.getElementById('lbCaption');
+    const lbDots    = document.getElementById('lbDots');
+    const lbCounter = document.getElementById('lbCounter');
+
+    // ── Open ──────────────────────────────────
+    window.openLightbox = function (cardEl) {
+        // Parse image list from the hidden <script> tag inside the card
+        const raw = cardEl.querySelector('.proj-images-data');
+        if (!raw) return;
+        try { IMAGES = JSON.parse(raw.textContent.trim()); } catch (e) { IMAGES = []; }
+        if (!IMAGES.length) return;
+
+        META = {
+            title:       cardEl.dataset.title       || '',
+            group:       cardEl.dataset.group       || '',
+            description: cardEl.dataset.description || ''
+        };
+        CURRENT = 0;
+
+        backdrop.removeAttribute('hidden');
+        document.body.style.overflow = 'hidden';
+
+        buildDots();
+        renderSlide();
+    };
+
+    // ── Close ─────────────────────────────────
+    window.closeLightbox = function () {
+        backdrop.setAttribute('hidden', '');
+        document.body.style.overflow = '';
+    };
+    backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) closeLightbox();
+    });
+
+    // ── Step ──────────────────────────────────
+    window.lbStep = function (dir) {
+        CURRENT = (CURRENT + dir + IMAGES.length) % IMAGES.length;
+        renderSlide(true);
+    };
+
+    // ── Render ────────────────────────────────
+    function renderSlide(animate) {
+        if (animate) {
+            lbImg.classList.add('lb-fading');
+            spinner.classList.add('active');
+        }
+
+        const item = IMAGES[CURRENT];
+        const img  = new Image();
+        img.onload = function () {
+            lbImg.src = item.src;
+            lbImg.alt = META.title;
+            lbImg.classList.remove('lb-fading');
+            spinner.classList.remove('active');
+        };
+        img.onerror = function () {
+            lbImg.classList.remove('lb-fading');
+            spinner.classList.remove('active');
+        };
+        img.src = item.src;
+
+        // Info
+        lbTitle.textContent   = META.title;
+        lbGroup.textContent   = META.group;
+        lbDesc.textContent    = META.description;
+        lbCaption.textContent = item.caption || '';
+        lbCounter.textContent = `${CURRENT + 1} / ${IMAGES.length}`;
+
+        // Dots
+        document.querySelectorAll('.lb-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === CURRENT);
+        });
+    }
+
+    // ── Dots ──────────────────────────────────
+    function buildDots() {
+        lbDots.innerHTML = '';
+        IMAGES.forEach((_, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'lb-dot' + (i === 0 ? ' active' : '');
+            btn.setAttribute('aria-label', 'Go to image ' + (i + 1));
+            btn.addEventListener('click', function () { CURRENT = i; renderSlide(true); });
+            lbDots.appendChild(btn);
+        });
+    }
+
+    // ── Keyboard ──────────────────────────────
+    document.addEventListener('keydown', function (e) {
+        if (backdrop.hasAttribute('hidden')) return;
+        if (e.key === 'Escape')     closeLightbox();
+        if (e.key === 'ArrowRight') lbStep(1);
+        if (e.key === 'ArrowLeft')  lbStep(-1);
+    });
+
+    // ── Touch / Swipe ─────────────────────────
+    let touchStartX = null;
+    backdrop.addEventListener('touchstart', function (e) {
+        touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    backdrop.addEventListener('touchend', function (e) {
+        if (touchStartX === null) return;
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) lbStep(diff > 0 ? 1 : -1);
+        touchStartX = null;
+    }, { passive: true });
+
+})();
+</script>
+
+{% endblock %}

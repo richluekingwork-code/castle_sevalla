@@ -1,0 +1,14 @@
+<!-- templates/accounts/signup.html: Signup template for allauth -->
+{% extends 'base.html' %}
+
+{% block title %}Signup{% endblock %}
+
+{% block content %}
+    <h1 class="text-3xl font-bold mb-6">Create an Account</h1>
+    <form method="POST" class="max-w-md mx-auto bg-white p-6 rounded shadow">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- allauth form fields: email, password1, password2 -->
+        <button type="submit" class="btn w-full">Signup</button>
+    </form>
+    <p class="mt-4 text-center">Already have an account? <a href="{% url 'account_login' %}" class="text-blue-500">Login</a></p>
+{% endblock %}

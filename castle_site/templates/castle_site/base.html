@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Castle General Group{% endblock %} | Leading Construction & Security</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a365d',     // Navy Blue
+                        secondary: '#c05621',   // Burnt Orange/Gold accent
+                        accent: '#f6ad55',
+                        dark: '#111827',
+                        light: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .hero-pattern {
+            background-color: #1a365d;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c05621' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800 bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300 glass border-b border-gray-100" id="navbar">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="{% url 'castle_site:home' %}" class="flex items-center gap-2 group">
+                
+                <!-- <div class="bg-primary text-white w-10 h-10 flex items-center justify-center rounded-lg font-bold text-xl shadow-lg group-hover:bg-secondary transition-colors">C</div>
+                <div class="font-serif">
+                    <span class="block text-xl font-bold text-primary leading-none">Castle</span>
+                    <span class="text-xs tracking-widest text-gray-500 uppercase">General Group</span>
+                </div> -->
+                
+                
+                {% if logo and logo.image %}
+                    <div class="h-12 w-px bg-gray-200 mx-4"></div>
+                    <img src="{{ logo.image.url }}" alt="Castle General Group Logo" class="absolute h-40 w-40 object-contain top-12 -translate-y-1/2">
+                {% endif %}
+
+            </a>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-8 font-medium text-sm tracking-wide">
+                <a href="{% url 'castle_site:home' %}" class="hover:text-secondary transition-colors uppercase">Home</a>
+                <a href="{% url 'castle_site:about' %}" class="hover:text-secondary transition-colors uppercase">About Us</a>
+                <a href="{% url 'castle_site:services' %}" class="hover:text-secondary transition-colors uppercase">Services</a>
+                <a href="{% url 'castle_site:projects' %}" class="hover:text-secondary transition-colors uppercase">Projects</a>
+                <a href="{% url 'castle_site:contact' %}" class="px-5 py-2.5 bg-primary text-white rounded-full hover:bg-secondary transition-all shadow-md hover:shadow-xl transform hover:-translate-y-0.5">Contact Us</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-2xl text-primary" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t absolute w-full shadow-xl">
+            <div class="flex flex-col p-6 gap-4 font-medium">
+                <a href="{% url 'castle_site:home' %}" class="block py-2">Home</a>
+                <a href="{% url 'castle_site:about' %}" class="block py-2">About Us</a>
+                <a href="{% url 'castle_site:services' %}" class="block py-2">Services</a>
+                <a href="{% url 'castle_site:projects' %}" class="block py-2">Projects</a>
+                <a href="{% url 'castle_site:contact' %}" class="block py-2 text-primary font-bold">Contact Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-24">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-16 pb-8">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <!-- Branding -->
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-6">
+                         {% if logo and logo.image %}
+                             <img src="{{ logo.image.url }}" alt="Castle Group" class="h-10 w-auto bg-white rounded p-1">
+                        {% else %}
+                            <div class="bg-white text-dark w-8 h-8 flex items-center justify-center rounded font-bold">C</div>
+                            <span class="text-xl font-serif font-bold">CastleGroup</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        Providing top-tier Construction, Security, and Logistics services across West Africa. Integrity, Quality, and Efficiency.
+                    </p>
+                    <div class="flex gap-4">
+                        {% for link in social_links %}
+                         <a href="{{ link.link }}" target="_blank" class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-secondary transition-colors">
+                            <i class="{{ link.icon_class }}"></i>
+                         </a>
+                        {% empty %}
+                            <!-- Default Socials -->
+                            <a href="#" class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-secondary transition-colors"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-secondary transition-colors"><i class="fab fa-linkedin-in"></i></a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- useful Links -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Company</h3>
+                    <ul class="space-y-3 text-gray-400 text-sm">
+                        <li><a href="{% url 'castle_site:about' %}" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="{% url 'castle_site:about' %}#team" class="hover:text-white transition-colors">Our Team</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <!-- Services -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Services</h3>
+                    <ul class="space-y-3 text-gray-400 text-sm">
+                        {% for service in services_list %}
+                            <li><a href="{% url 'castle_site:services' %}" class="hover:text-white transition-colors">{{ service.title }}</a></li>
+                        {% empty %}
+                            <li><a href="#" class="hover:text-white transition-colors">Construction</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Security Guard</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Logistics</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Contact</h3>
+                    <ul class="space-y-4 text-gray-400 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-map-marker-alt mt-1 text-secondary"></i>
+                            <span>{{ contact_info.address|default:"Seekie Community, Duport Road, Paynesville, Liberia" }}</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-phone text-secondary"></i>
+                            <span>{{ contact_info.phone|default:"(+231) 880-337-882" }}</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-secondary"></i>
+                            <span>{{ contact_info.email|default:"info@castlegroup.com" }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-xs">
+                &copy; {% now "Y" %} Castle General Group of Company. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+        });
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

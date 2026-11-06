@@ -1,0 +1,48 @@
+<!-- templates/base.html: Base template with Tailwind/Alpine CDNs, nav, footer -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Castle Plan Room{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- PDF.js CDN for previews -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <style>
+        /* Custom styles if needed */
+        .btn { @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600; }
+        .card { @apply border rounded-lg p-4 shadow; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow p-4">
+        <div class="container mx-auto flex justify-between">
+            <a href="{% url 'plan_list' %}" class="text-xl font-bold">Castle Plan Room</a>
+            <div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'account_logout' %}">Logout</a>  <!-- allauth logout -->
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="mr-4">Login</a>
+                    <a href="{% url 'account_signup' %}">Signup</a>  <!-- allauth signup -->
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <main class="container mx-auto py-8">
+        {% for message in messages %}
+            <p class="bg-yellow-100 p-4 mb-6 rounded">{{ message }}</p>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="bg-white shadow p-4 mt-8">
+        <div class="container mx-auto text-center">
+            &copy; 2026 Castle General Group. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

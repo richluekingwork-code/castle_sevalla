@@ -1,0 +1,81 @@
+{% extends 'castle_site/base.html' %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="bg-primary text-white py-20 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+    <div class="container mx-auto px-6 relative z-10 text-center">
+        <h1 class="text-4xl md:text-5xl font-serif font-bold mb-4" data-aos="fade-down">About Castle Group</h1>
+        <p class="text-white/70 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">Establish in 2017, earning a reputation for integrity, efficiency, and quality.</p>
+    </div>
+</div>
+
+<!-- Mission/Vision -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+            <div data-aos="fade-right">
+                <h5 class="text-secondary font-bold uppercase mb-2">Our Foundation</h5>
+                <h2 class="text-3xl font-serif font-bold text-primary mb-6">Mission & Vision</h2>
+                <div class="prose text-gray-600">
+                    {{ about.mission_statement|safe }}
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-6" data-aos="fade-left">
+                <div class="p-6 bg-light rounded-lg border-l-4 border-secondary shadow-sm">
+                    <h3 class="text-xl font-bold text-primary mb-2"><i class="fas fa-eye mr-2 text-secondary"></i> Vision</h3>
+                    <p class="text-gray-600 text-sm">{{ about.vision_statement|safe|striptags }}</p>
+                </div>
+                <div class="p-6 bg-light rounded-lg border-l-4 border-primary shadow-sm">
+                    <h3 class="text-xl font-bold text-primary mb-2"><i class="fas fa-bullseye mr-2 text-secondary"></i> Mission</h3>
+                    <p class="text-gray-600 text-sm">{{ about.mission_statement|safe|striptags }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="bg-gradient-to-br from-gray-50 to-white p-8 md:p-12 rounded-2xl shadow-lg border border-gray-100" data-aos="fade-up">
+            <h3 class="text-2xl font-bold text-primary mb-6 text-center">Our History & Story</h3>
+            <div class="prose max-w-none text-gray-700 mx-auto">
+                {{ about.history|safe|default:"No history content available yet." }}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="py-20 bg-light" id="team">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-serif font-bold text-primary">Our Leadership Team</h2>
+            <div class="w-16 h-1 bg-secondary mx-auto mt-4 rounded"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {% for member in team %}
+            <div class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}00">
+                <div class="h-64 overflow-hidden relative">
+                    {% if member.image %}
+                    <img src="{{ member.image.url }}" alt="{{ member.fullname }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                    {% else %}
+                    <div class="w-full h-full bg-gray-300 flex items-center justify-center">
+                        <i class="fas fa-user-tie text-4xl text-gray-500"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-lg font-bold text-primary">{{ member.fullname }}</h3>
+                    <p class="text-secondary text-sm mb-4">{{ member.title }}</p>
+                    <div class="text-xs text-gray-500 line-clamp-3 mb-4">
+                        {{ member.bio|safe|striptags }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

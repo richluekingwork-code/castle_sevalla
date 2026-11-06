@@ -1,0 +1,60 @@
+<!-- templates/plan_room/list.html: Plan room browsing page with filters and search -->
+{% extends 'plan_room/base.html' %}
+
+{% block title %}Plan Room{% endblock %}
+
+{% block content %}
+    <h1 class="text-3xl font-bold mb-6">Explore Our Project Plans</h1>
+    
+    <!-- Search and Filters -->
+    <form method="GET" class="mb-8 flex flex-wrap gap-4">
+        {{ search_form.query }}
+        <select name="category" class="border p-2">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="access" class="border p-2">
+            <option value="">All Access Types</option>
+            {% for value, label in access_types %}
+                <option value="{{ value }}" {% if request.GET.access == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn">Filter</button>
+    </form>
+    
+    <!-- Plan Set Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for plan_set in plan_sets %}
+            <div class="card">
+                {% if plan_set.cover_image %}
+                    <img src="{{ plan_set.cover_image.url }}" alt="{{ plan_set.title }}" class="w-full h-48 object-cover mb-4">
+                {% endif %}
+                <h2 class="text-xl font-semibold">{{ plan_set.title }}</h2>
+                <p class="text-gray-600">Prepared by {{ plan_set.prepared_by }}</p>
+                <p class="mb-4">{{ plan_set.description|truncatewords:30 }}</p>
+                <p class="font-bold">
+                    {{ plan_set.get_access_type_display }}
+                </p>
+                <a href="{% url 'plan_set_detail' plan_set.pk %}" class="btn mt-2">View Details</a>
+            </div>
+        {% empty %}
+            <p>No plan sets found. Try adjusting your filters.</p>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="mt-8 flex justify-center">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn mr-2">Previous</a>
+            {% endif %}
+            <span>Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn ml-2">Next</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}
+

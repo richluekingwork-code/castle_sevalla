@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local database (production uses Sevalla PostgreSQL)
+*.sqlite3
+db.sqlite3-journal
+
+# User uploads live in Cloudinary in production
+media/
+
+# Generated static output is rebuilt on every Sevalla deploy
+staticfiles/
+
+# Logs, OS and editor files
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
