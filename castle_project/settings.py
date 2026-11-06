@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 from decouple import config, Csv
 import dj_database_url
@@ -165,8 +166,10 @@ if _database_url:
             conn_health_checks=True,
         )
     }
-elif not DEBUG:
+elif not DEBUG and 'collectstatic' not in sys.argv:
     # A container's SQLite file is wiped on every deploy, so never fall back to it in production.
+    # collectstatic is exempt: Sevalla runs it during the build, before a database is attached,
+    # and it never touches the database.
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured('Set DATABASE_URL (or DB_URL) when DEBUG is False.')
 else:
