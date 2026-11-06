@@ -23,15 +23,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+# Accepts either SECRET_KEY or the DJANGO_-prefixed names used by other Sevalla apps.
+SECRET_KEY = config('SECRET_KEY', default='') or config('DJANGO_SECRET_KEY', default='')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG', default=config('DJANGO_DEBUG', default=False, cast=bool), cast=bool)
+
+if not SECRET_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(
+        'SECRET_KEY is not set. Add SECRET_KEY (or DJANGO_SECRET_KEY) to the '
+        'application environment variables and redeploy.'
+    )
 
 # 1. Hosts: the Sevalla default domain and the custom domains are always allowed.
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='.sevalla.app,castlegengroup.com,www.castlegengroup.com,localhost,127.0.0.1',
+    default=config(
+        'DJANGO_ALLOWED_HOSTS',
+        default='.sevalla.app,castlegengroup.com,www.castlegengroup.com,localhost,127.0.0.1',
+    ),
     cast=Csv(),
 )
 
